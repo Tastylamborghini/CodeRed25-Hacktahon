@@ -1,35 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { LayoutBuilder, Navbar, Footer } from './components';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className="app">
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<LayoutBuilder />} />
+          </Routes>
+        </main>
+        <Footer />
       </div>
-      <h1>🅱️ite + 🅱️eact</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 100)}>
-          🅱️lick me {count}
-        </button>
-        <p>
-          🅱️asic structure is all set up 👍👍👍
-        </p>
-      </div>
-      <p className="read-the-docs">
-        🅱️lick on the Vite and React logos to learn less
-      </p>
-    </>
-  )
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
