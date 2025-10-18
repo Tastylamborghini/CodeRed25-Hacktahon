@@ -1,8 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Grid, RoomCard, Toolbar, AIHelper, PresetSelector } from './index';
-import { Plus, RotateCcw, Save, Download } from 'lucide-react';
+import Grid from './Grid';
+import RoomCard from './RoomCard';
+import Toolbar from './Toolbar';
+import AIHelper from './AIHelper';
+import PresetSelector from './PresetSelector';
+import { Plus, RotateCcw, Save, Download, Menu, X } from 'lucide-react';
 
 const LayoutBuilder = () => {
   const [rooms, setRooms] = useState([]);
@@ -11,16 +15,18 @@ const LayoutBuilder = () => {
   const [gridSize, setGridSize] = useState({ rows: 10, cols: 10 });
   const [showAIHelper, setShowAIHelper] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [isToolbarExpanded, setIsToolbarExpanded] = useState(true);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   const roomTypes = [
-    { id: 'bedroom', name: 'Bedroom', color: '#FFB6C1', icon: '🛏️' },
-    { id: 'bathroom', name: 'Bathroom', color: '#87CEEB', icon: '🚿' },
-    { id: 'kitchen', name: 'Kitchen', color: '#F0E68C', icon: '🍳' },
-    { id: 'living', name: 'Living Room', color: '#98FB98', icon: '🛋️' },
-    { id: 'dining', name: 'Dining Room', color: '#DDA0DD', icon: '🍽️' },
-    { id: 'study', name: 'Study Room', color: '#F5DEB3', icon: '📚' },
-    { id: 'office', name: 'Office', color: '#E6E6FA', icon: '💼' },
-    { id: 'storage', name: 'Storage', color: '#D3D3D3', icon: '📦' }
+    { id: 'bedroom', name: 'Bedroom', color: '#f8fafc', icon: 'bed' },
+    { id: 'bathroom', name: 'Bathroom', color: '#f1f5f9', icon: 'shower' },
+    { id: 'kitchen', name: 'Kitchen', color: '#f8fafc', icon: 'chef-hat' },
+    { id: 'living', name: 'Living Room', color: '#f1f5f9', icon: 'sofa' },
+    { id: 'dining', name: 'Dining Room', color: '#f8fafc', icon: 'utensils' },
+    { id: 'study', name: 'Study Room', color: '#f1f5f9', icon: 'book-open' },
+    { id: 'office', name: 'Office', color: '#f8fafc', icon: 'briefcase' },
+    { id: 'storage', name: 'Storage', color: '#f1f5f9', icon: 'package' }
   ];
 
   const presets = [
@@ -54,6 +60,30 @@ const LayoutBuilder = () => {
         { type: 'kitchen', x: 1, y: 4, width: 3, height: 2 },
         { type: 'dining', x: 4, y: 4, width: 2, height: 2 }
       ]
+    }
+  ];
+
+  const categories = [
+    {
+      id: 'rooms',
+      name: 'Rooms',
+      icon: 'home',
+      description: 'Drag and drop room types to build your layout',
+      color: '#6366f1'
+    },
+    {
+      id: 'presets',
+      name: 'Presets',
+      icon: 'layers',
+      description: 'Choose from pre-designed layouts',
+      color: '#8b5cf6'
+    },
+    {
+      id: 'settings',
+      name: 'Settings',
+      icon: 'settings',
+      description: 'Configure grid and export options',
+      color: '#64748b'
     }
   ];
 
@@ -152,7 +182,16 @@ const LayoutBuilder = () => {
         onDragEnd={handleDragEnd}
       >
         <div className="builder-header">
-          <h1 className="builder-title">Home Layout Optimizer</h1>
+          <div className="builder-header-left">
+            <button 
+              className="toolbar-toggle"
+              onClick={() => setIsToolbarExpanded(!isToolbarExpanded)}
+              title={isToolbarExpanded ? "Hide Toolbar" : "Show Toolbar"}
+            >
+              {isToolbarExpanded ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <h1 className="builder-title">Home Layout Optimizer</h1>
+          </div>
           <div className="builder-actions">
             <button 
               className="btn btn-secondary"
@@ -172,14 +211,19 @@ const LayoutBuilder = () => {
         </div>
 
         <div className="builder-content">
-          <Toolbar 
-            roomTypes={roomTypes}
-            presets={presets}
-            onPresetSelect={applyPreset}
-            selectedPreset={selectedPreset}
-          />
+          {isToolbarExpanded && (
+            <Toolbar 
+              categories={categories}
+              activeCategory={activeCategory}
+              onCategorySelect={setActiveCategory}
+              roomTypes={roomTypes}
+              presets={presets}
+              onPresetSelect={applyPreset}
+              selectedPreset={selectedPreset}
+            />
+          )}
           
-          <div className="workspace-container">
+          <div className={`workspace-container ${!isToolbarExpanded ? 'full-width' : ''}`}>
             <Grid
               rooms={rooms}
               gridSize={gridSize}
