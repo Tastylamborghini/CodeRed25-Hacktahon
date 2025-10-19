@@ -4,18 +4,77 @@ import Canvas from './components/Canvas.jsx';
 import Toolbar from './components/Toolbar.jsx';
 import RenameDialog from './components/RenameDialog.jsx';
 import ContextMenu from './components/ContextMenu.jsx';
+import * as floorPlanService from './services/floorPlanService.js';
 import './index.css'; // Tailwind import
 
 const App = () => {
     const svgRef = useRef(null);
     
-    const { 
-        state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
-        renameTarget, isDrawingFurniture, contextMenu,
-        addFurniture, clearAll, undo, redo, handleMouseDown, deleteFurniture, completeRename, 
-        handleContextMenu, closeContextMenu, handleRenameFromContextMenu, handleDeleteFromContextMenu,
-        closeRenameDialog,
-    } = useFloorPlan(svgRef);
+        const { 
+            state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
+            renameTarget, isDrawingFurniture, contextMenu,
+            addFurniture, clearAll, undo, redo, handleMouseDown, deleteFurniture, completeRename, 
+            handleContextMenu, closeContextMenu, handleRenameFromContextMenu, handleDeleteFromContextMenu,
+            closeRenameDialog, loadFloorPlan,
+        } = useFloorPlan(svgRef);
+
+        const handleSave = async () => {
+            try {
+                console.log('Attempting to save floor plan...', { state, rooms, gridSize, cellSize });
+                
+                // Convert to backend format
+                const data = floorPlanService.convertToBackendFormat(state, rooms, gridSize, cellSize);
+                
+                // Create filename with timestamp
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `floor-plan-${timestamp}.json`;
+                
+                // Create and trigger download
+                const jsonString = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                console.log('Floor plan downloaded successfully');
+                alert(`Floor plan downloaded successfully! Filename: ${filename}`);
+            } catch (error) {
+                console.error('Error saving floor plan:', error);
+                alert(`Failed to save floor plan: ${error.message}. Please check console for details.`);
+            }
+        };
+
+        const handleLoad = () => {
+            // Create file input for loading JSON files
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    const loadedData = floorPlanService.convertFromBackendFormat(data);
+                    
+                    // Load the floor plan data
+                    loadFloorPlan(loadedData.state, loadedData.rooms);
+                    alert(`Loaded floor plan: ${file.name}`);
+                    console.log('Loaded data:', loadedData);
+                } catch (error) {
+                    console.error('Error loading floor plan:', error);
+                    alert('Failed to load floor plan. Please check the file format.');
+                }
+            };
+            input.click();
+        };
 
     return (
         <div 
@@ -62,13 +121,15 @@ const App = () => {
                     </h1>
                 </div>
 
-                <Toolbar 
-                    addFurniture={addFurniture}
-                    clearAll={clearAll}
-                    undo={undo}
-                    redo={redo}
-                    isDrawingFurniture={isDrawingFurniture}
-                />
+                    <Toolbar 
+                        addFurniture={addFurniture}
+                        clearAll={clearAll}
+                        undo={undo}
+                        redo={redo}
+                        isDrawingFurniture={isDrawingFurniture}
+                        onSave={handleSave}
+                        onLoad={handleLoad}
+                    />
                 
                 <Canvas
                     svgRef={svgRef}

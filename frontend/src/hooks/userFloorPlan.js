@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import * as planService from '../services/planService';
+import * as floorPlanService from '../services/floorPlanService';
 
 const gridSize = 15;
 const WALL_TYPE = { NONE: 0, WALL: 1, DOOR: 2, WINDOW: 3 };
 const roomColors = ['#ffcc9980', '#add8e680', '#c8fac880', '#ffb4b480', '#e6e6fa80', '#ffc0cb80'];
+const roomNames = ['Living Room', 'Kitchen', 'Bedroom', 'Bathroom', 'Office', 'Dining Room', 'Hallway', 'Storage'];
 const MAX_HISTORY = 20;
 
 const getInitialState = () => ({
@@ -88,6 +89,9 @@ export const useFloorPlan = (svgRef) => {
     const dragOffsetRef = useRef({ x: 0, y: 0 });
     const [dragPreview, setDragPreview] = useState(null);
     
+    // Ref to store custom room names
+    const customRoomNamesRef = useRef({});
+    
     // Calculate cell size dynamically
     const cellSize = svgRef.current ? svgRef.current.clientWidth / (gridSize + 1) : 40;
 
@@ -129,14 +133,10 @@ export const useFloorPlan = (svgRef) => {
             setState(newState);
         }
         
-        // **API Call to Backend**
-        try {
-            await planService.savePlan(stateToSave);
-        } catch (error) {
-            console.error("Failed to save plan:", error);
-        }
+            // Note: Automatic save removed to avoid conflicts with manual save
+            // Manual save is handled in App.jsx
 
-    }, [state]);
+    }, [state, rooms, cellSize]);
 
     const loadState = useCallback((index) => {
         if (index < 0 || index >= historyStackRef.current.length) return false;
@@ -157,25 +157,74 @@ export const useFloorPlan = (svgRef) => {
     // --- Room Detection (Runs on state change) ---
 
     const detectRooms = useCallback(() => {
-        // ... (BFS room detection logic from previous implementation) ...
-        // This is where the complex BFS runs. Since it's identical to the previous monolith version,
-        // we keep the function name and assume the complex logic is implemented here.
         const { horizontalWalls, verticalWalls } = state;
         let newRooms = [];
         let roomMap = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null)); 
         let nextRoomId = 1;
+        
+        // Use custom room names from ref
+        const existingRoomNames = customRoomNamesRef.current;
+        
+        // Create a mapping of current room cells to existing room IDs
+        const cellToRoomId = new Map();
+        const usedRoomIds = new Set();
+        rooms.forEach(room => {
+            usedRoomIds.add(room.id);
+            room.cells.forEach(cell => {
+                cellToRoomId.set(`${cell.r}-${cell.c}`, room.id);
+            });
+        });
+        
+        // Find the next available room ID
+        while (usedRoomIds.has(nextRoomId)) {
+            nextRoomId++;
+        }
 
         for (let r = 0; r < gridSize; r++) {
             for (let c = 0; c < gridSize; c++) {
                 if (roomMap[r][c] === null) {
                     
-                    let currentRoom = { id: nextRoomId, name: `Room ${nextRoomId}`, cells: [], color: roomColors[(nextRoomId - 1) % roomColors.length], minR: gridSize, maxR: -1, minC: gridSize, maxC: -1 };
+                    // Check if this cell was part of an existing room
+                    const existingRoomId = cellToRoomId.get(`${r}-${c}`);
+                    let roomId = nextRoomId;
+                    let roomName, roomColor;
+                    
+                    if (existingRoomId) {
+                        // Preserve existing room ID, name, and color
+                        roomId = existingRoomId;
+                        roomName = existingRoomNames[existingRoomId] || 
+                                  roomNames[(existingRoomId - 1) % roomNames.length] || 
+                                  `Room ${existingRoomId}`;
+                        roomColor = roomColors[(existingRoomId - 1) % roomColors.length];
+                    } else {
+                        // New room - assign new ID and default name/color
+                        roomName = existingRoomNames[nextRoomId] || 
+                                  roomNames[(nextRoomId - 1) % roomNames.length] || 
+                                  `Room ${nextRoomId}`;
+                        roomColor = roomColors[(nextRoomId - 1) % roomColors.length];
+                        usedRoomIds.add(nextRoomId);
+                        // Find next available ID for future new rooms
+                        nextRoomId++;
+                        while (usedRoomIds.has(nextRoomId)) {
+                            nextRoomId++;
+                        }
+                    }
+                    
+                    let currentRoom = { 
+                        id: roomId, 
+                        name: roomName, 
+                        cells: [], 
+                        color: roomColor, 
+                        minR: gridSize, 
+                        maxR: -1, 
+                        minC: gridSize, 
+                        maxC: -1 
+                    };
                     const queue = [{r, c}];
-                    roomMap[r][c] = nextRoomId;
+                    roomMap[r][c] = roomId;
                     let isBounded = true; 
 
                     while (queue.length > 0) {
-                        // ... (BFS logic goes here) ...
                         const cell = queue.shift();
                         currentRoom.cells.push(cell);
                         currentRoom.minR = Math.min(currentRoom.minR, cell.r);
@@ -208,18 +257,65 @@ export const useFloorPlan = (svgRef) => {
                                 continue;
                             }
                             
-                            if (roomMap[nr][nc] === null) {
-                                roomMap[nr][nc] = nextRoomId;
-                                queue.push({r: nr, c: nc});
-                            }
+                                if (roomMap[nr][nc] === null) {
+                                    roomMap[nr][nc] = roomId;
+                                    queue.push({r: nr, c: nc});
+                                }
                         }
                     }
                     
                     if (isBounded && currentRoom.cells.length > 0) {
-                        currentRoom.centerX = (currentRoom.minC + currentRoom.maxC + 1) * cellSize / 2;
-                        currentRoom.centerY = (currentRoom.minR + currentRoom.maxR + 1) * cellSize / 2;
+                        // Find the best position within the room boundaries
+                        // For complex shapes like U-rooms, we need to find a point inside the room
+                        
+                        // Method 1: Try the centroid first
+                        const totalCells = currentRoom.cells.length;
+                        const sumX = currentRoom.cells.reduce((sum, cell) => sum + (cell.c + 0.5), 0);
+                        const sumY = currentRoom.cells.reduce((sum, cell) => sum + (cell.r + 0.5), 0);
+                        
+                        const centroidCol = sumX / totalCells;
+                        const centroidRow = sumY / totalCells;
+                        
+                        // Check if centroid is within room boundaries
+                        const centroidCell = {
+                            c: Math.floor(centroidCol),
+                            r: Math.floor(centroidRow)
+                        };
+                        
+                        const isCentroidInRoom = currentRoom.cells.some(cell => 
+                            cell.r === centroidCell.r && cell.c === centroidCell.c
+                        );
+                        
+                        let centerX, centerY;
+                        
+                        if (isCentroidInRoom) {
+                            // Centroid is within room - use it
+                            centerX = centroidCol * cellSize;
+                            centerY = centroidRow * cellSize;
+                        } else {
+                            // Centroid is outside room - find the cell closest to centroid that's inside
+                            let bestCell = currentRoom.cells[0];
+                            let minDistance = Math.abs(currentRoom.cells[0].c + 0.5 - centroidCol) + 
+                                            Math.abs(currentRoom.cells[0].r + 0.5 - centroidRow);
+                            
+                            for (const cell of currentRoom.cells) {
+                                const distance = Math.abs(cell.c + 0.5 - centroidCol) + 
+                                              Math.abs(cell.r + 0.5 - centroidRow);
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    bestCell = cell;
+                                }
+                            }
+                            
+                            // Position at center of best cell
+                            centerX = (bestCell.c + 0.5) * cellSize;
+                            centerY = (bestCell.r + 0.5) * cellSize;
+                        }
+                        
+                        currentRoom.centerX = centerX;
+                        currentRoom.centerY = centerY;
+                        
                         newRooms.push(currentRoom);
-                        nextRoomId++;
                     } else {
                         currentRoom.cells.forEach(cell => { roomMap[cell.r][cell.c] = -1; });
                     }
@@ -255,6 +351,9 @@ export const useFloorPlan = (svgRef) => {
             setState(newState);
             saveState(newState);
         } else if (renameTarget.type === 'room') {
+             // Store custom room name in ref
+             customRoomNamesRef.current[renameTarget.id] = newName;
+             // Update rooms state
              setRooms(rooms.map(r => r.id === renameTarget.id ? {...r, name: newName} : r));
              // Room name change doesn't require floor state save, but a separate API call might be used.
         }
@@ -315,7 +414,9 @@ export const useFloorPlan = (svgRef) => {
         
         if (target.dataset.roomid) {
             const room = rooms.find(r => r.id === parseInt(target.dataset.roomid));
-            if (room) startRename('room', room.id, room.name);
+            if (room) {
+                startRename('room', room.id, room.name);
+            }
             return;
         }
 
@@ -545,38 +646,61 @@ export const useFloorPlan = (svgRef) => {
     }, [isDrawingWall, isDrawingFurniture, isMovingOrResizing, selectedFurnitureId, state, cellSize, getSvgCoords, saveState]);
 
 
-    // Effects
-    useEffect(() => { detectRooms(); }, [state, cellSize, detectRooms]);
-    useEffect(() => { saveState(getInitialState()); }, []); // Initial state save
+        // Effects
+        useEffect(() => { detectRooms(); }, [state, cellSize, detectRooms]);
 
     const clearAll = useCallback(() => {
         const clearedState = getInitialState();
         setState(clearedState);
         saveState(clearedState);
         setSelectedFurnitureId(null);
+        // Clear custom room names
+        customRoomNamesRef.current = {};
     }, [saveState]);
 
-    return {
-        state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
-        renameTarget, isDrawingFurniture, contextMenu,
+    const loadFloorPlan = useCallback((newState, newRooms) => {
+        // Update state
+        setState(newState);
         
-        // Actions
-        addFurniture: () => { 
-            // Enable furniture drawing mode
-            setIsDrawingFurniture(true);
-        },
-        deleteFurniture,
-        handleContextMenu,
-        closeContextMenu,
-        handleRenameFromContextMenu,
-        handleDeleteFromContextMenu,
-        startRename,
-        completeRename,
-        closeRenameDialog,
-        undo, redo,
-        clearAll,
+        // Update custom room names from loaded rooms
+        const newCustomNames = {};
+        newRooms.forEach(room => {
+            newCustomNames[room.id] = room.name;
+        });
+        customRoomNamesRef.current = newCustomNames;
         
-        // Handlers
-        handleMouseDown,
-    };
+        // Clear selection
+        setSelectedFurnitureId(null);
+        
+        // Update history
+        historyStackRef.current = [newState];
+        historyIndexRef.current = 0;
+        
+        console.log('Floor plan loaded successfully');
+    }, []);
+
+        return {
+            state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
+            renameTarget, isDrawingFurniture, contextMenu,
+            
+            // Actions
+            addFurniture: () => { 
+                // Enable furniture drawing mode
+                setIsDrawingFurniture(true);
+            },
+            deleteFurniture,
+            handleContextMenu,
+            closeContextMenu,
+            handleRenameFromContextMenu,
+            handleDeleteFromContextMenu,
+            startRename,
+            completeRename,
+            closeRenameDialog,
+            undo, redo,
+            clearAll,
+            loadFloorPlan,
+            
+            // Handlers
+            handleMouseDown,
+        };
 };

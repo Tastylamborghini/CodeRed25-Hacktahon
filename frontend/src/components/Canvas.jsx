@@ -104,8 +104,46 @@ const Canvas = ({
                             width={cellSize}
                             height={cellSize}
                             fill={room.color}
+                            className="room-cell cursor-pointer"
+                            style={{ 
+                                transition: 'fill 0.2s ease-in-out',
+                                cursor: 'pointer'
+                            }}
                         />
                     )))}
+                </g>
+
+                {/* Room Names Background Text */}
+                <g id="room-names-group">
+                    {rooms.map(room => (
+                        <g key={`room-name-${room.id}`}>
+                            {/* Background circle for better readability */}
+                            <circle
+                                cx={room.centerX}
+                                cy={room.centerY}
+                                r={Math.min(cellSize * 0.4, 20)}
+                                fill="rgba(255, 255, 255, 0.3)"
+                                stroke="rgba(0, 0, 0, 0.1)"
+                                strokeWidth="1"
+                            />
+                            {/* Room name text */}
+                            <text
+                                x={room.centerX}
+                                y={room.centerY}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                fontSize={Math.min(cellSize * 0.6, 18)}
+                                fill="rgba(0, 0, 0, 0.4)"
+                                fontWeight="600"
+                                style={{ 
+                                    pointerEvents: 'none',
+                                    userSelect: 'none'
+                                }}
+                            >
+                                {room.name}
+                            </text>
+                        </g>
+                    ))}
                 </g>
                 
                 {/* Walls Group - Renders the actual visible lines */}
@@ -166,24 +204,6 @@ const Canvas = ({
                 <g id="interactive-group">{interactiveWalls}</g>
             </svg>
             
-            {/* HTML Overlay for Room Labels (Pointer events handled by SVG background rect) */}
-            <div id="html-overlay" className="absolute inset-0 pointer-events-none">
-                {rooms.map(room => (
-                    <div 
-                        key={`label-${room.id}`}
-                        data-roomid={room.id}
-                        className="room-label pointer-events-auto cursor-pointer text-sm font-semibold text-gray-700 bg-white px-2 py-1 rounded shadow-md hover:ring-2 hover:ring-indigo-500 transition-shadow duration-150"
-                        style={{ 
-                            position: 'absolute',
-                            left: `${room.centerX}px`, 
-                            top: `${room.centerY}px`,
-                            transform: 'translate(-50%, -50%)',
-                        }}
-                    >
-                        {room.name}
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };
