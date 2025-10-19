@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs').promises;
+const aiService = require('./services/aiService');
 require('dotenv').config();
 
 const app = express();
@@ -179,48 +180,45 @@ app.delete('/api/floor-plans/:filename', async (req, res) => {
     }
 });
 
-// AI Chat endpoint
-app.post('/api/ai/chat', async (req, res) => {
-    try {
-        console.log('=== AI Chat Endpoint Called ===');
-        console.log('Message:', req.body.message);
-        console.log('Floor plan data:', !!req.body.floorPlanData);
-        console.log('Conversation history:', req.body.conversationHistory?.length || 0);
-        
-        const { message, floorPlanData, conversationHistory } = req.body;
-        
-        if (!message) {
-            return res.status(400).json({ 
-                error: 'Message is required' 
+    // AI Chatbot endpoint
+    app.post('/api/ai/chat', async (req, res) => {
+        try {
+            const { message, floorPlanData, conversationHistory = [] } = req.body;
+            
+            console.log('=== AI Chat Endpoint Called ===');
+            console.log('Message:', message);
+            console.log('Floor plan data:', !!floorPlanData);
+            console.log('Conversation history:', conversationHistory.length);
+            
+            if (!message) {
+                return res.status(400).json({ 
+                    error: 'Message is required' 
+                });
+            }
+
+            // Analyze the floor plan and generate AI response
+            console.log('About to call aiService.generateAIResponse');
+            const aiResponse = await aiService.generateAIResponse(message, floorPlanData, conversationHistory);
+            console.log('aiService.generateAIResponse returned:', !!aiResponse);
+            console.log('Response has debug field:', !!aiResponse.debug);
+            
+            res.json({
+                success: true,
+                response: aiResponse.response,
+                suggestions: aiResponse.suggestions,
+                updatedFloorPlan: aiResponse.updatedFloorPlan,
+                debug: aiResponse.debug,
+                timestamp: new Date().toISOString()
+            });
+
+        } catch (error) {
+            console.error('Error processing AI chat:', error);
+            res.status(500).json({ 
+                error: 'Failed to process AI request',
+                details: error.message 
             });
         }
-        
-        if (!floorPlanData) {
-            return res.status(400).json({ 
-                error: 'Floor plan data is required' 
-            });
-        }
-        
-        console.log('About to call aiService.generateAIResponse');
-        
-        // Import AI service
-        const aiService = require('./services/aiService');
-        
-        const result = await aiService.generateAIResponse(message, floorPlanData, conversationHistory);
-        
-        console.log('aiService.generateAIResponse returned:', !!result);
-        console.log('Response has debug field:', !!result.debug);
-        
-        res.json(result);
-        
-    } catch (error) {
-        console.error('AI Chat Error:', error);
-        res.status(500).json({ 
-            error: 'Failed to process AI request',
-            details: error.message 
-        });
-    }
-});
+    });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
