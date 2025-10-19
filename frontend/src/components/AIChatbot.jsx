@@ -92,85 +92,83 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div 
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 50,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}
-        >
-            {/* Backdrop */}
-            <div 
-                className="fixed inset-0 bg-black bg-opacity-50"
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                }}
-                onClick={onClose}
-            />
+        <>
+            {/* Backdrop - only show when sidebar is open */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-30 z-40"
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        zIndex: 40
+                    }}
+                    onClick={onClose}
+                />
+            )}
             
-            {/* Chat Window */}
-            <div 
-                className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 h-96 flex flex-col"
-                style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: '8px',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-                    width: '100%',
-                    maxWidth: '48rem',
-                    margin: '0 16px',
-                    height: '24rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                    zIndex: 51
-                }}
-            >
+                {/* Sidebar */}
+                <div 
+                    className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col border-l border-gray-200 ${
+                        isOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        right: 0,
+                        height: '100vh',
+                        width: '24rem', // 384px
+                        backgroundColor: '#ffffff',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+                        transition: 'transform 300ms ease-in-out',
+                        zIndex: 50,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderLeft: '1px solid #e5e7eb'
+                    }}
+                >
                 {/* Header */}
                 <div 
-                    className="flex justify-between items-center p-4 border-b"
+                    className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-800"
                     style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        padding: '16px',
-                        borderBottom: '1px solid #e5e7eb'
+                        padding: '24px',
+                        borderBottom: '1px solid #e5e7eb',
+                        backgroundColor: '#1f2937'
                     }}
                 >
                     <h2 
-                        className="text-lg font-semibold text-gray-900"
+                        className="text-xl font-bold text-white"
                         style={{
-                            fontSize: '18px',
-                            fontWeight: '600',
-                            color: '#111827'
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#ffffff',
+                            margin: 0
                         }}
                     >
-                        🤖 AI Design Assistant
+                        AI Design Assistant
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600"
+                        className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-all duration-200"
                         style={{
-                            color: '#9ca3af',
+                            padding: '8px',
+                            backgroundColor: 'transparent',
+                            borderRadius: '8px',
                             cursor: 'pointer',
-                            fontSize: '20px'
+                            border: 'none',
+                            fontSize: '18px',
+                            color: '#ffffff'
                         }}
                     >
-                        ×
+                        ✕
                     </button>
                 </div>
 
@@ -195,21 +193,23 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                                 justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start'
                             }}
                         >
-                            <div
-                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                    message.type === 'user'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-900'
-                                }`}
-                                style={{
-                                    maxWidth: message.type === 'user' ? '12rem' : '24rem',
-                                    padding: '8px 16px',
-                                    borderRadius: '8px',
-                                    backgroundColor: message.type === 'user' ? '#2563eb' : '#f3f4f6',
-                                    color: message.type === 'user' ? '#ffffff' : '#111827',
-                                    whiteSpace: 'pre-wrap'
-                                }}
-                            >
+                                <div
+                                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-sm ${
+                                        message.type === 'user'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-900 border border-gray-200'
+                                    }`}
+                                    style={{
+                                        maxWidth: message.type === 'user' ? '12rem' : '24rem',
+                                        padding: '12px 16px',
+                                        borderRadius: '12px',
+                                        backgroundColor: message.type === 'user' ? '#2563eb' : '#ffffff',
+                                        color: message.type === 'user' ? '#ffffff' : '#111827',
+                                        whiteSpace: 'pre-wrap',
+                                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                                        border: message.type === 'user' ? 'none' : '1px solid #e5e7eb'
+                                    }}
+                                >
                                 {message.content}
                                 
                                 {/* Show suggestions if available */}
@@ -224,24 +224,29 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                                     </div>
                                 )}
                                 
-                                {/* Apply suggestions button */}
-                                {message.updatedFloorPlan && (
-                                    <button
-                                        onClick={() => applySuggestions(message.updatedFloorPlan)}
-                                        className="mt-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                                        style={{
-                                            marginTop: '8px',
-                                            padding: '4px 12px',
-                                            backgroundColor: '#059669',
-                                            color: '#ffffff',
-                                            fontSize: '14px',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Apply Suggestions
-                                    </button>
-                                )}
+                                    {/* Apply suggestions button - always show if there's an updatedFloorPlan */}
+                                    {message.updatedFloorPlan && (
+                                        <button
+                                            onClick={() => applySuggestions(message.updatedFloorPlan)}
+                                            className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-md"
+                                            style={{
+                                                marginTop: '12px',
+                                                padding: '8px 16px',
+                                                backgroundColor: '#059669',
+                                                color: '#ffffff',
+                                                fontSize: '14px',
+                                                fontWeight: '600',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                            }}
+                                        >
+                                            {message.updatedFloorPlan.furniture && message.updatedFloorPlan.furniture.length > 0 
+                                                ? 'Apply Suggestions' 
+                                                : 'Apply Changes'
+                                            }
+                                        </button>
+                                    )}
                             </div>
                         </div>
                     ))}
@@ -270,40 +275,45 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
 
                 {/* Input */}
                 <div 
-                    className="p-4 border-t"
+                    className="p-6 border-t border-gray-200 bg-gray-50"
                     style={{
-                        padding: '16px',
-                        borderTop: '1px solid #e5e7eb'
+                        padding: '24px',
+                        borderTop: '1px solid #e5e7eb',
+                        backgroundColor: '#f9fafb'
                     }}
                 >
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                         <input
                             type="text"
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
                             onKeyPress={handleKeyPress}
                             placeholder="Ask about furniture, design tips, or layout suggestions..."
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white shadow-sm"
                             style={{
                                 flex: 1,
-                                padding: '8px 12px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
+                                padding: '12px 16px',
+                                border: '2px solid #e5e7eb',
+                                borderRadius: '12px',
                                 outline: 'none',
-                                fontSize: '14px'
+                                fontSize: '14px',
+                                backgroundColor: '#ffffff',
+                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                             }}
                             disabled={isLoading}
                         />
                         <button
                             onClick={sendMessage}
                             disabled={!inputMessage.trim() || isLoading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg transition-all duration-200 transform hover:scale-105"
                             style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#2563eb',
+                                padding: '12px 24px',
+                                backgroundColor: '#7c3aed',
                                 color: '#ffffff',
-                                borderRadius: '6px',
-                                cursor: 'pointer'
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                             }}
                         >
                             Send
@@ -311,7 +321,7 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

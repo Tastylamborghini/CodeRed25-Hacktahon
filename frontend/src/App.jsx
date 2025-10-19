@@ -96,48 +96,61 @@ const App = () => {
 
     return (
         <div 
-            className="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4"
+            className="min-h-screen bg-gray-50"
             style={{
-                backgroundColor: '#f9fafb',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
                 minHeight: '100vh',
-                padding: '16px'
+                backgroundColor: '#f9fafb'
             }}
         >
-            <div 
-                className="w-full max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-6"
-                style={{
-                    width: '100%',
-                    maxWidth: '80rem',
-                    margin: '0 auto',
-                    backgroundColor: '#ffffff',
-                    borderRadius: '12px',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                    padding: '24px'
-                }}
-            >
+            <div className="container mx-auto px-4 py-8 animate-fade-in-up">
                 <div 
-                    className="text-center mb-6"
+                    className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
                     style={{
-                        textAlign: 'center',
-                        marginBottom: '24px'
+                        width: '100%',
+                        maxWidth: '72rem',
+                        margin: '0 auto',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '16px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        border: '1px solid #f1f5f9',
+                        overflow: 'hidden'
                     }}
                 >
-                    <h1 
-                        className="text-3xl font-extrabold text-gray-900 tracking-tight"
+                    {/* Header */}
+                    <div 
+                        className="bg-gray-800 px-8 py-6"
                         style={{
-                            fontSize: '30px',
-                            fontWeight: '800',
-                            color: '#111827',
-                            letterSpacing: '-0.025em'
+                            backgroundColor: '#1f2937',
+                            padding: '24px 32px'
                         }}
                     >
-                        Floor Plan Designer
-                    </h1>
-                </div>
+                        <h1 
+                            className="text-3xl font-bold text-white text-center tracking-tight"
+                            style={{
+                                fontSize: '32px',
+                                fontWeight: '700',
+                                color: '#ffffff',
+                                letterSpacing: '-0.025em',
+                                textAlign: 'center'
+                            }}
+                        >
+                            Floor Plan Designer
+                        </h1>
+                        <p 
+                            className="text-gray-300 text-center mt-2 text-sm"
+                            style={{
+                                color: '#d1d5db',
+                                textAlign: 'center',
+                                marginTop: '8px',
+                                fontSize: '14px'
+                            }}
+                        >
+                            Design, customize, and optimize your space with AI assistance
+                        </p>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="p-8" style={{ padding: '32px' }}>
 
                     <Toolbar 
                         addFurniture={addFurniture}
@@ -159,7 +172,6 @@ const App = () => {
                     gridSize={gridSize}
                     WALL_TYPE={WALL_TYPE}
                     handleMouseDown={handleMouseDown}
-                    deleteFurniture={deleteFurniture}
                     dragPreview={dragPreview}
                     handleContextMenu={handleContextMenu}
                     isDrawingFurniture={isDrawingFurniture}
@@ -188,8 +200,10 @@ const App = () => {
                         floorPlanData={floorPlanService.convertToBackendFormat(state, rooms, gridSize, cellSize)}
                         onApplySuggestions={handleApplyAISuggestions}
                     />
+                    </div>
                 </div>
             </div>
+        </div>
         );
     };
 

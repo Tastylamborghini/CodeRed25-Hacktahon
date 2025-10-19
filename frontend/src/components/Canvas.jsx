@@ -4,7 +4,7 @@ import FurniturePiece from './FurniturePiece.jsx';
 
 const Canvas = ({ 
     svgRef, state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE,
-    handleMouseDown, deleteFurniture, dragPreview, handleContextMenu, isDrawingFurniture
+    handleMouseDown, dragPreview, handleContextMenu, isDrawingFurniture
 }) => {
     
     const svgSize = (gridSize + 1) * cellSize;
@@ -19,8 +19,9 @@ const Canvas = ({
                         key={`${i}-${j}`}
                         cx={(j + 0.5) * cellSize}
                         cy={(i + 0.5) * cellSize}
-                        r={2}
-                        fill="#d1d5db"
+                        r={1.5}
+                        fill="#cbd5e1"
+                        opacity="0.6"
                     />
                 );
             }
@@ -78,10 +79,29 @@ const Canvas = ({
 
 
     return (
-        <div id="canvas-container" className={`relative w-full aspect-square bg-gray-50 rounded-lg overflow-hidden border-2 ${isDrawingFurniture ? 'border-indigo-500 border-dashed' : 'border-gray-200'}`}>
+        <div 
+            id="canvas-container" 
+            className={`relative w-full aspect-square bg-gray-50 rounded-xl overflow-hidden border-2 shadow-lg ${isDrawingFurniture ? 'border-blue-500 border-dashed' : 'border-gray-200'}`}
+            style={{
+                backgroundColor: '#f9fafb',
+                borderRadius: '12px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+            }}
+        >
             {isDrawingFurniture && (
-                <div className="absolute top-2 left-2 bg-indigo-600 text-white px-3 py-1 rounded-md text-sm font-medium z-10">
-                    🎯 Furniture Mode - Click and drag to place furniture
+                <div 
+                    className="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold z-10 shadow-lg"
+                    style={{
+                        backgroundColor: '#2563eb',
+                        color: '#ffffff',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
+                >
+                    Furniture Mode - Click and drag to place furniture
                 </div>
             )}
             <svg 
@@ -121,10 +141,10 @@ const Canvas = ({
                             <circle
                                 cx={room.centerX}
                                 cy={room.centerY}
-                                r={Math.min(cellSize * 0.4, 20)}
-                                fill="rgba(255, 255, 255, 0.3)"
-                                stroke="rgba(0, 0, 0, 0.1)"
-                                strokeWidth="1"
+                                r={Math.min(cellSize * 0.5, 24)}
+                                fill="rgba(255, 255, 255, 0.8)"
+                                stroke="rgba(0, 0, 0, 0.15)"
+                                strokeWidth="1.5"
                             />
                             {/* Room name text */}
                             <text
@@ -132,12 +152,13 @@ const Canvas = ({
                                 y={room.centerY}
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fontSize={Math.min(cellSize * 0.6, 18)}
-                                fill="rgba(0, 0, 0, 0.4)"
-                                fontWeight="600"
+                                fontSize={Math.min(cellSize * 0.5, 16)}
+                                fill="rgba(0, 0, 0, 0.7)"
+                                fontWeight="700"
                                 style={{ 
                                     pointerEvents: 'none',
-                                    userSelect: 'none'
+                                    userSelect: 'none',
+                                    textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)'
                                 }}
                             >
                                 {room.name}
