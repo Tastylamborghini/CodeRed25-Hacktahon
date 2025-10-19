@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './ui/button'; // Assumes shadcn/ui Button is generated here
+import { Button } from './ui/button.jsx'; // Assumes shadcn/ui Button is generated here
 
 const Toolbar = ({ addFurniture, clearAll, undo, redo }) => (
     <div className="flex justify-center items-center space-x-3 mb-6 p-3 bg-gray-50 rounded-lg border">

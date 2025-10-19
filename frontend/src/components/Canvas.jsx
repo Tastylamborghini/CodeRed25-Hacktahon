@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import WallSegment from './WallSegment'; 
-import FurniturePiece from './FurniturePiece'; 
+import WallSegment from './WallSegment.jsx'; 
+import FurniturePiece from './FurniturePiece.jsx'; 
 
 const Canvas = ({ 
     svgRef, state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE,

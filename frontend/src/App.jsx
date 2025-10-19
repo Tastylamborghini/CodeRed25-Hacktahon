@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import { useFloorPlan } from './hooks/useFloorPlan';
-import Canvas from './components/Canvas';
-import Toolbar from './components/Toolbar';
-import RenameDialog from './components/RenameDialog';
+import { useFloorPlan } from './hooks/userFloorPlan.js';
+import Canvas from './components/Canvas.jsx';
+import Toolbar from './components/Toolbar.jsx';
+import RenameDialog from './components/RenameDialog.jsx';
 import './index.css'; // Tailwind import
 
 const App = () => {
