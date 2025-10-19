@@ -1,0 +1,321 @@
+{
+  "walls": [
+    {
+      "x": 520,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 600,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 680,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 760,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 840,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 920,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 1000,
+      "y": 40,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 840,
+      "y": 280,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 920,
+      "y": 280,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 1000,
+      "y": 280,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 520,
+      "y": 520,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 600,
+      "y": 520,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 680,
+      "y": 520,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 760,
+      "y": 520,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 520,
+      "y": 40,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 1080,
+      "y": 40,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 520,
+      "y": 120,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 1080,
+      "y": 120,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 520,
+      "y": 200,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 1080,
+      "y": 200,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 520,
+      "y": 280,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 840,
+      "y": 280,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 520,
+      "y": 360,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 840,
+      "y": 360,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 520,
+      "y": 440,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 840,
+      "y": 440,
+      "type": "wall",
+      "orientation": "vertical"
+    }
+  ],
+  "furniture": [
+    {
+      "name": "Blah",
+      "origin_x": 560,
+      "origin_y": 240,
+      "end_x": 720,
+      "end_y": 400,
+      "width": 160,
+      "height": 160
+    }
+  ],
+  "rooms": [
+    {
+      "id": 2,
+      "name": "NotKit",
+      "cells": [
+        {
+          "r": 0,
+          "c": 6
+        },
+        {
+          "r": 1,
+          "c": 6
+        },
+        {
+          "r": 0,
+          "c": 7
+        },
+        {
+          "r": 2,
+          "c": 6
+        },
+        {
+          "r": 1,
+          "c": 7
+        },
+        {
+          "r": 0,
+          "c": 8
+        },
+        {
+          "r": 3,
+          "c": 6
+        },
+        {
+          "r": 2,
+          "c": 7
+        },
+        {
+          "r": 1,
+          "c": 8
+        },
+        {
+          "r": 0,
+          "c": 9
+        },
+        {
+          "r": 4,
+          "c": 6
+        },
+        {
+          "r": 3,
+          "c": 7
+        },
+        {
+          "r": 2,
+          "c": 8
+        },
+        {
+          "r": 1,
+          "c": 9
+        },
+        {
+          "r": 0,
+          "c": 10
+        },
+        {
+          "r": 5,
+          "c": 6
+        },
+        {
+          "r": 4,
+          "c": 7
+        },
+        {
+          "r": 3,
+          "c": 8
+        },
+        {
+          "r": 2,
+          "c": 9
+        },
+        {
+          "r": 1,
+          "c": 10
+        },
+        {
+          "r": 0,
+          "c": 11
+        },
+        {
+          "r": 5,
+          "c": 7
+        },
+        {
+          "r": 4,
+          "c": 8
+        },
+        {
+          "r": 3,
+          "c": 9
+        },
+        {
+          "r": 2,
+          "c": 10
+        },
+        {
+          "r": 1,
+          "c": 11
+        },
+        {
+          "r": 0,
+          "c": 12
+        },
+        {
+          "r": 5,
+          "c": 8
+        },
+        {
+          "r": 4,
+          "c": 9
+        },
+        {
+          "r": 2,
+          "c": 11
+        },
+        {
+          "r": 1,
+          "c": 12
+        },
+        {
+          "r": 5,
+          "c": 9
+        },
+        {
+          "r": 2,
+          "c": 12
+        }
+      ],
+      "centerX": 716.3636363636364,
+      "centerY": 207.27272727272725,
+      "color": "#add8e680"
+    }
+  ],
+  "metadata": {
+    "gridSize": 15,
+    "cellSize": 80,
+    "name": "Floor Plan 10/19/2025",
+    "version": "1.0",
+    "lastModified": "2025-10-19T06:19:55.082Z"
+  }
+}
