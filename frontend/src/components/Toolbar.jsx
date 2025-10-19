@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from './ui/button.jsx'; // Assumes shadcn/ui Button is generated here
 
-const Toolbar = ({ addFurniture, clearAll, undo, redo, isDrawingFurniture, onSave, onLoad }) => (
+const Toolbar = ({ addFurniture, clearAll, undo, redo, isDrawingFurniture, onSave, onLoad, onOpenAI }) => (
     <div className="flex justify-center items-center space-x-3 mb-6 p-3 bg-gray-50 rounded-lg border flex-col">
         
         <button 
@@ -106,6 +106,20 @@ const Toolbar = ({ addFurniture, clearAll, undo, redo, isDrawingFurniture, onSav
                     }}
                 >
                     📁 Load Plan
+                </button>
+                <button 
+                    onClick={onOpenAI} 
+                    className="px-4 py-2 rounded-md font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                    style={{
+                        backgroundColor: '#7c3aed',
+                        color: '#ffffff',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                    }}
+                >
+                    🤖 AI Assistant
                 </button>
             </div>
         

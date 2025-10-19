@@ -1,14 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useFloorPlan } from './hooks/userFloorPlan.js';
 import Canvas from './components/Canvas.jsx';
 import Toolbar from './components/Toolbar.jsx';
 import RenameDialog from './components/RenameDialog.jsx';
 import ContextMenu from './components/ContextMenu.jsx';
+import AIChatbot from './components/AIChatbot.jsx';
 import * as floorPlanService from './services/floorPlanService.js';
 import './index.css'; // Tailwind import
 
 const App = () => {
     const svgRef = useRef(null);
+    const [isAIChatOpen, setIsAIChatOpen] = useState(false);
     
         const { 
             state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
@@ -76,6 +78,22 @@ const App = () => {
             input.click();
         };
 
+        const handleOpenAI = () => {
+            setIsAIChatOpen(true);
+        };
+
+        const handleCloseAI = () => {
+            setIsAIChatOpen(false);
+        };
+
+        const handleApplyAISuggestions = (updatedFloorPlan) => {
+            if (updatedFloorPlan) {
+                const convertedData = floorPlanService.convertFromBackendFormat(updatedFloorPlan);
+                loadFloorPlan(convertedData.state, convertedData.rooms);
+                setIsAIChatOpen(false);
+            }
+        };
+
     return (
         <div 
             className="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4"
@@ -129,6 +147,7 @@ const App = () => {
                         isDrawingFurniture={isDrawingFurniture}
                         onSave={handleSave}
                         onLoad={handleLoad}
+                        onOpenAI={handleOpenAI}
                     />
                 
                 <Canvas
@@ -153,17 +172,25 @@ const App = () => {
                     onClose={closeRenameDialog}
                 />
 
-                {/* Context Menu */}
-                <ContextMenu
-                    isOpen={contextMenu.isOpen}
-                    position={contextMenu.position}
-                    onRename={handleRenameFromContextMenu}
-                    onDelete={handleDeleteFromContextMenu}
-                    onClose={closeContextMenu}
-                />
+                    {/* Context Menu */}
+                    <ContextMenu
+                        isOpen={contextMenu.isOpen}
+                        position={contextMenu.position}
+                        onRename={handleRenameFromContextMenu}
+                        onDelete={handleDeleteFromContextMenu}
+                        onClose={closeContextMenu}
+                    />
+
+                    {/* AI Chatbot */}
+                    <AIChatbot
+                        isOpen={isAIChatOpen}
+                        onClose={handleCloseAI}
+                        floorPlanData={floorPlanService.convertToBackendFormat(state, rooms, gridSize, cellSize)}
+                        onApplySuggestions={handleApplyAISuggestions}
+                    />
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    };
 
 export default App;
