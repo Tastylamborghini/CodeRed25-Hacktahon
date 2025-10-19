@@ -1,0 +1,142 @@
+{
+  "walls": [
+    {
+      "x": 0.5,
+      "y": 0.5,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 1.5,
+      "y": 0.5,
+      "type": "door",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 2.5,
+      "y": 0.5,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 0.5,
+      "y": 0.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 0.5,
+      "y": 1.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 0.5,
+      "y": 2.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 2.5,
+      "y": 0.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 2.5,
+      "y": 1.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 2.5,
+      "y": 2.5,
+      "type": "wall",
+      "orientation": "vertical"
+    },
+    {
+      "x": 0.5,
+      "y": 2.5,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 1.5,
+      "y": 2.5,
+      "type": "wall",
+      "orientation": "horizontal"
+    },
+    {
+      "x": 2.5,
+      "y": 2.5,
+      "type": "wall",
+      "orientation": "horizontal"
+    }
+  ],
+  "furniture": [
+    {
+      "name": "Large Sofa",
+      "origin_x": 80,
+      "origin_y": 80,
+      "end_x": 320,
+      "end_y": 160,
+      "width": 240,
+      "height": 80,
+      "id": 1700000000000
+    },
+    {
+      "name": "Coffee Table",
+      "origin_x": 160,
+      "origin_y": 200,
+      "end_x": 240,
+      "end_y": 280,
+      "width": 80,
+      "height": 80,
+      "id": 1700000000001
+    },
+    {
+      "name": "Side Table",
+      "origin_x": 80,
+      "origin_y": 80,
+      "end_x": 160,
+      "end_y": 160,
+      "width": 80,
+      "height": 80,
+      "id": 1700000000002
+    },
+    {
+      "name": "Accent Chair",
+      "origin_x": 160,
+      "origin_y": 80,
+      "end_x": 240,
+      "end_y": 160,
+      "width": 80,
+      "height": 80,
+      "id": 1700000000003
+    }
+  ],
+  "rooms": [
+    {
+      "id": 1,
+      "name": "Living Room",
+      "cells": [
+        {"r": 0, "c": 0},
+        {"r": 0, "c": 1},
+        {"r": 1, "c": 0},
+        {"r": 1, "c": 1},
+        {"r": 2, "c": 0},
+        {"r": 2, "c": 1}
+      ],
+      "centerX": 60,
+      "centerY": 60,
+      "color": "#ffcc9980"
+    }
+  ],
+  "metadata": {
+    "gridSize": 15,
+    "cellSize": 80,
+    "name": "Sample Floor Plan",
+    "version": "1.0",
+    "description": "Template showing proper JSON structure and constraints"
+  }
+}
