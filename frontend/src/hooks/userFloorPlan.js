@@ -74,6 +74,9 @@ export const useFloorPlan = (svgRef) => {
     
     // Dialog State (for shadcn renaming)
     const [renameTarget, setRenameTarget] = useState(null); // { type: 'room'|'furniture', id: number, currentName: string }
+    
+    // Context Menu State
+    const [contextMenu, setContextMenu] = useState({ isOpen: false, position: { x: 0, y: 0 }, furnitureId: null });
 
     // Refs for mutable state during drag operations
     const historyStackRef = useRef([getInitialState()]);
@@ -232,6 +235,10 @@ export const useFloorPlan = (svgRef) => {
         setRenameTarget({ type, id, currentName });
     }, []);
 
+    const closeRenameDialog = useCallback(() => {
+        setRenameTarget(null);
+    }, []);
+
     const completeRename = useCallback((newName) => {
         if (!renameTarget || !newName) {
             setRenameTarget(null);
@@ -264,6 +271,33 @@ export const useFloorPlan = (svgRef) => {
         saveState(newState);
     }, [state, saveState]);
 
+    const handleContextMenu = useCallback((e, furnitureId) => {
+        e.preventDefault();
+        setSelectedFurnitureId(furnitureId);
+        setContextMenu({
+            isOpen: true,
+            position: { x: e.clientX, y: e.clientY },
+            furnitureId
+        });
+    }, []);
+
+    const closeContextMenu = useCallback(() => {
+        setContextMenu({ isOpen: false, position: { x: 0, y: 0 }, furnitureId: null });
+    }, []);
+
+    const handleRenameFromContextMenu = useCallback(() => {
+        const furniture = state.furniture.find(f => f.id === contextMenu.furnitureId);
+        if (furniture) {
+            startRename('furniture', furniture.id, furniture.name);
+        }
+    }, [state.furniture, contextMenu.furnitureId, startRename]);
+
+    const handleDeleteFromContextMenu = useCallback(() => {
+        if (contextMenu.furnitureId) {
+            deleteFurniture(contextMenu.furnitureId);
+        }
+    }, [contextMenu.furnitureId, deleteFurniture]);
+
 
     // --- Mouse Handlers (Refactored to React/Synthetic Events) ---
     
@@ -272,6 +306,12 @@ export const useFloorPlan = (svgRef) => {
         setSelectedFurnitureId(null);
         
         const target = e.target;
+        
+        // Exit furniture drawing mode if clicking on empty space
+        if (isDrawingFurniture && (target.id === 'floor-plan-svg' || target.parentElement.id === 'interactive-group')) {
+            setIsDrawingFurniture(false);
+            return;
+        }
         
         if (target.dataset.roomid) {
             const room = rooms.find(r => r.id === parseInt(target.dataset.roomid));
@@ -318,9 +358,23 @@ export const useFloorPlan = (svgRef) => {
                  dragOffsetRef.current.direction = target.dataset.direction;
             }
 
-        } else if (target.id === 'floor-plan-svg' || target.parentElement.id === 'interactive-group') { // Furniture draw start
-            setIsDrawingFurniture(true);
+        } else if (target.id === 'floor-plan-svg' || target.parentElement.id === 'interactive-group' || target.parentElement.id === 'rooms-group') { // Furniture draw start
+            // Only start furniture drawing if we're in furniture mode
+            if (!isDrawingFurniture) return;
             
+            const coords = getSvgCoords(e);
+            dragStartCellRef.current = {
+                col: Math.floor(coords.x / cellSize - 0.5),
+                row: Math.floor(coords.y / cellSize - 0.5)
+            };
+            setDragPreview({
+                x: (dragStartCellRef.current.col + 0.5) * cellSize,
+                y: (dragStartCellRef.current.row + 0.5) * cellSize,
+                width: 0,
+                height: 0,
+            });
+        } else if (target.dataset.roomid && isDrawingFurniture) {
+            // Handle clicks directly on room elements
             const coords = getSvgCoords(e);
             dragStartCellRef.current = {
                 col: Math.floor(coords.x / cellSize - 0.5),
@@ -336,7 +390,7 @@ export const useFloorPlan = (svgRef) => {
         
         if (isDrawingWall || isMovingOrResizing || isDrawingFurniture) e.preventDefault();
         
-    }, [state, rooms, cellSize, getSvgCoords, startRename]);
+    }, [state, rooms, cellSize, getSvgCoords, startRename, isDrawingFurniture]);
 
 
     // Global Mouse Move Handler
@@ -504,13 +558,21 @@ export const useFloorPlan = (svgRef) => {
 
     return {
         state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
-        renameTarget,
+        renameTarget, isDrawingFurniture, contextMenu,
         
         // Actions
-        addFurniture: () => { /* Simplified for brevity, would usually trigger creation mode */ },
+        addFurniture: () => { 
+            // Enable furniture drawing mode
+            setIsDrawingFurniture(true);
+        },
         deleteFurniture,
+        handleContextMenu,
+        closeContextMenu,
+        handleRenameFromContextMenu,
+        handleDeleteFromContextMenu,
         startRename,
         completeRename,
+        closeRenameDialog,
         undo, redo,
         clearAll,
         

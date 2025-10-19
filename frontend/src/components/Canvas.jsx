@@ -4,7 +4,7 @@ import FurniturePiece from './FurniturePiece.jsx';
 
 const Canvas = ({ 
     svgRef, state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE,
-    handleMouseDown, deleteFurniture, dragPreview
+    handleMouseDown, deleteFurniture, dragPreview, handleContextMenu, isDrawingFurniture
 }) => {
     
     const svgSize = (gridSize + 1) * cellSize;
@@ -78,7 +78,12 @@ const Canvas = ({
 
 
     return (
-        <div id="canvas-container" className="relative w-full aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+        <div id="canvas-container" className={`relative w-full aspect-square bg-gray-50 rounded-lg overflow-hidden border-2 ${isDrawingFurniture ? 'border-indigo-500 border-dashed' : 'border-gray-200'}`}>
+            {isDrawingFurniture && (
+                <div className="absolute top-2 left-2 bg-indigo-600 text-white px-3 py-1 rounded-md text-sm font-medium z-10">
+                    🎯 Furniture Mode - Click and drag to place furniture
+                </div>
+            )}
             <svg 
                 id="floor-plan-svg" 
                 ref={svgRef} 
@@ -86,6 +91,7 @@ const Canvas = ({
                 height="100%" 
                 viewBox={`0 0 ${svgSize} ${svgSize}`}
                 onMouseDown={handleMouseDown}
+                className={isDrawingFurniture ? 'cursor-crosshair' : ''}
             >
                 {/* Rooms Group */}
                 <g id="rooms-group">
@@ -137,7 +143,7 @@ const Canvas = ({
                             furniture={f}
                             cellSize={cellSize}
                             isSelected={f.id === selectedFurnitureId}
-                            onContextMenu={(e) => { e.preventDefault(); deleteFurniture(f.id); }} // Context menu for quick delete
+                            onContextMenu={handleContextMenu}
                         />
                     ))}
                 </g>

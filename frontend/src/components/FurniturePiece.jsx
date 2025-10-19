@@ -8,6 +8,12 @@ const FurniturePiece = ({ furniture, cellSize, isSelected, onContextMenu }) => {
     const width = w * cellSize;
     const height = h * cellSize;
 
+    const handleContextMenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onContextMenu(e, id);
+    };
+
     return (
         <g>
             {/* Furniture Rectangle */}
@@ -22,7 +28,7 @@ const FurniturePiece = ({ furniture, cellSize, isSelected, onContextMenu }) => {
                 stroke={isSelected ? "#ef4444" : "#6366f1"}
                 strokeWidth={isSelected ? "3" : "2"}
                 className={`furniture-rect cursor-grab transition-all duration-100 ease-in-out`}
-                onContextMenu={onContextMenu}
+                onContextMenu={handleContextMenu}
             />
 
             {/* Furniture Name Text */}
