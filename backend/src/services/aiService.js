@@ -1,4 +1,3 @@
-const OpenAI = require('openai');
 const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
@@ -332,7 +331,7 @@ const generateMockResponse = async (message, floorPlanData, analysis) => {
     return {
         response,
         suggestions: designTips,
-        updatedFloorPlan: generateUpdatedFloorPlan(floorPlanData, analysis),
+        updatedFloorPlan: generateUpdatedFloorPlan(floorPlanData, analysis, message),
         debug: {
             mockResponseUsed: true,
             generateAIResponseCalled: true,
