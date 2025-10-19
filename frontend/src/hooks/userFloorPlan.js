@@ -65,7 +65,7 @@ const isWallSegmentBlockedByFurniture = (r, c, type, furniture) => {
 // --- End Utility Functions ---
 
 
-export const useFloorPlan = (svgRef) => {
+export const useFloorPlan = (svgRef, onError = null) => {
     const [state, setState] = useState(getInitialState());
     const [rooms, setRooms] = useState([]);
     const [selectedFurnitureId, setSelectedFurnitureId] = useState(null);
@@ -425,7 +425,12 @@ export const useFloorPlan = (svgRef) => {
             const r = parseInt(row);
             const c = parseInt(col);
 
-            if (isWallSegmentBlockedByFurniture(r, c, type, state.furniture)) return; 
+            if (isWallSegmentBlockedByFurniture(r, c, type, state.furniture)) {
+                if (onError) {
+                    onError('Cannot place walls through furniture. Please move or delete the furniture first.');
+                }
+                return;
+            } 
             
             setIsDrawingWall(true);
             
@@ -600,10 +605,20 @@ export const useFloorPlan = (svgRef) => {
                     id: Date.now()
                 };
 
-                if (newFurniture.w > 0 && newFurniture.h > 0 && !isAreaOccupied(newFurniture, newState.furniture) && !isCollidingWithWall(newFurniture, newState.horizontalWalls, newState.verticalWalls)) {
+                const isOccupied = isAreaOccupied(newFurniture, newState.furniture);
+                const isWallCollision = isCollidingWithWall(newFurniture, newState.horizontalWalls, newState.verticalWalls);
+
+                if (newFurniture.w > 0 && newFurniture.h > 0 && !isOccupied && !isWallCollision) {
                     newState.furniture.push(newFurniture);
                     setSelectedFurnitureId(newFurniture.id);
                     stateChanged = true;
+                } else if (newFurniture.w > 0 && newFurniture.h > 0) {
+                    // Show appropriate error message for furniture creation
+                    if (isWallCollision && onError) {
+                        onError('Cannot create furniture through walls. Please draw the furniture in a valid area.');
+                    } else if (isOccupied && onError) {
+                        onError('Cannot create furniture inside other furniture. Please draw the furniture in an empty area.');
+                    }
                 }
                 
                 setIsDrawingFurniture(false);
@@ -616,7 +631,18 @@ export const useFloorPlan = (svgRef) => {
                 
                 if (piece && initial) {
                     // Final collision check: revert if invalid
-                    if (isAreaOccupied(piece, newState.furniture, selectedFurnitureId) || isCollidingWithWall(piece, newState.horizontalWalls, newState.verticalWalls)) {
+                    const isOccupied = isAreaOccupied(piece, newState.furniture, selectedFurnitureId);
+                    const isWallCollision = isCollidingWithWall(piece, newState.horizontalWalls, newState.verticalWalls);
+                    
+                    if (isOccupied || isWallCollision) {
+                        // Show appropriate error message
+                        if (isWallCollision && onError) {
+                            onError('Cannot place furniture through walls. Please move the furniture to a valid position.');
+                        } else if (isOccupied && onError) {
+                            onError('Cannot place furniture inside other furniture. Please move the furniture to an empty area.');
+                        }
+                        
+                        // Revert to original position
                         piece.col = initial.col;
                         piece.row = initial.row;
                         piece.w = initial.w;

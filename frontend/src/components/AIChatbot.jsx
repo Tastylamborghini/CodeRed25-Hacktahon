@@ -37,6 +37,14 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
         setIsLoading(true);
 
         try {
+            console.log('=== Sending AI request ===');
+            console.log('Request URL:', 'http://localhost:3001/api/ai/chat');
+            console.log('Request data:', {
+                message: inputMessage,
+                floorPlanData: floorPlanData,
+                conversationHistory: messages.slice(-5)
+            });
+            
             const response = await fetch('http://localhost:3001/api/ai/chat', {
                 method: 'POST',
                 headers: {
@@ -49,11 +57,17 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                 })
             });
 
+            console.log('=== Response received ===');
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('=== Response data ===');
+            console.log('Response data:', data);
             
             const aiMessage = {
                 id: Date.now() + 1,
@@ -64,9 +78,16 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                 timestamp: data.timestamp
             };
 
+            console.log('=== AI Message created ===');
+            console.log('AI Message:', aiMessage);
+
             setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('=== Error in AI request ===');
+            console.error('Error details:', error);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            
             const errorMessage = {
                 id: Date.now() + 1,
                 type: 'ai',
@@ -87,8 +108,15 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
     };
 
     const applySuggestions = (updatedFloorPlan) => {
+        console.log('=== applySuggestions called ===');
+        console.log('updatedFloorPlan:', updatedFloorPlan);
+        console.log('onApplySuggestions function:', !!onApplySuggestions);
+        
         if (updatedFloorPlan && onApplySuggestions) {
+            console.log('Calling onApplySuggestions...');
             onApplySuggestions(updatedFloorPlan);
+        } else {
+            console.log('Missing updatedFloorPlan or onApplySuggestions callback');
         }
     };
 
@@ -227,7 +255,14 @@ const AIChatbot = ({ isOpen, onClose, floorPlanData, onApplySuggestions }) => {
                                     {/* Apply suggestions button - always show if there's an updatedFloorPlan */}
                                     {message.updatedFloorPlan && (
                                         <button
-                                            onClick={() => applySuggestions(message.updatedFloorPlan)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                console.log('=== Apply Suggestions button clicked ===');
+                                                console.log('message.updatedFloorPlan:', message.updatedFloorPlan);
+                                                console.log('Button element:', e.target);
+                                                applySuggestions(message.updatedFloorPlan);
+                                            }}
                                             className="mt-3 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-all duration-200 transform hover:scale-105 shadow-md"
                                             style={{
                                                 marginTop: '12px',

@@ -243,15 +243,17 @@ User Question: "${message}"
 
 IMPORTANT RULES:
 1. Speak naturally about interior design - furniture, colors, layouts, and aesthetics
-2. When users request specific furniture, mention that you've placed it in their floor plan
-3. If furniture cannot be placed due to space constraints, explain why and suggest alternatives
-4. Focus on design principles, functionality, and visual appeal
-5. Never mention technical details like coordinates, JSON, or file formats
-6. Be conversational, helpful, and professional
+2. When users ask for help with their floor plan, proactively suggest appropriate furniture for each room
+3. Mention that you've placed suggested furniture in their floor plan
+4. If furniture cannot be placed due to space constraints, explain why and suggest alternatives
+5. Focus on design principles, functionality, and visual appeal
+6. Never mention technical details like coordinates, JSON, or file formats
+7. Be conversational, helpful, and professional
 
 RESPONSE FORMAT:
 - Provide helpful interior design advice in natural language
-- If the user requests specific furniture to be added, mention that furniture has been placed in their floor plan
+- Proactively suggest appropriate furniture for each room based on room type and size
+- Mention that suggested furniture has been placed in their floor plan
 - If furniture cannot be placed due to space constraints or overlaps, explain why and suggest alternatives
 - Focus on design principles, aesthetics, and practical functionality
 - Always mention what actions were taken (furniture added, advice given, etc.)
@@ -645,6 +647,57 @@ const parseFurnitureRequest = (message) => {
     return furnitureTypes;
 };
 
+// Helper function to suggest appropriate furniture for rooms
+const suggestFurnitureForRooms = (rooms) => {
+    const suggestions = [];
+    
+    rooms.forEach(room => {
+        const roomName = room.name.toLowerCase();
+        const roomCells = room.cells || [];
+        
+        if (roomCells.length === 0) return;
+        
+        const minC = Math.min(...roomCells.map(c => c.c));
+        const maxC = Math.max(...roomCells.map(c => c.c));
+        const minR = Math.min(...roomCells.map(c => c.r));
+        const maxR = Math.max(...roomCells.map(c => c.r));
+        
+        const roomWidth = maxC - minC;
+        const roomHeight = maxR - minR;
+        
+        // Suggest furniture based on room type and size
+        if (roomName.includes('living') || roomName.includes('family') || roomName.includes('lounge')) {
+            if (roomWidth >= 1 && roomHeight >= 1) {
+                suggestions.push('sofa');
+            }
+            if (roomWidth >= 1 && roomHeight >= 1) {
+                suggestions.push('coffee table');
+            }
+        } else if (roomName.includes('bedroom') || roomName.includes('master')) {
+            if (roomWidth >= 1 && roomHeight >= 1) {
+                suggestions.push('bed');
+            }
+            if (roomWidth >= 1 && roomHeight >= 1) {
+                suggestions.push('nightstand');
+            }
+        } else if (roomName.includes('kitchen')) {
+            if (roomWidth >= 2 && roomHeight >= 1) {
+                suggestions.push('kitchen island');
+            }
+        } else if (roomName.includes('dining')) {
+            if (roomWidth >= 2 && roomHeight >= 1) {
+                suggestions.push('dining table');
+            }
+        } else if (roomName.includes('office') || roomName.includes('study')) {
+            if (roomWidth >= 1 && roomHeight >= 1) {
+                suggestions.push('desk');
+            }
+        }
+    });
+    
+    return suggestions;
+};
+
 // Helper function to determine if furniture should be added to a room
 const shouldAddFurnitureToRoom = (furnitureType, roomName) => {
     const roomType = roomName.toLowerCase();
@@ -880,9 +933,16 @@ const generateUpdatedFloorPlan = (originalData, analysis, userMessage = '') => {
     
     console.log('Requested furniture:', requestedFurniture);
     
-    // If no specific furniture requested, return original data
+    // If no specific furniture requested, suggest appropriate furniture for rooms
+    let furnitureToAdd = requestedFurniture;
     if (requestedFurniture.length === 0) {
-        console.log('No specific furniture requested, returning original data');
+        console.log('No specific furniture requested, suggesting appropriate furniture for rooms');
+        furnitureToAdd = suggestFurnitureForRooms(rooms);
+        console.log('Suggested furniture:', furnitureToAdd);
+    }
+    
+    if (furnitureToAdd.length === 0) {
+        console.log('No furniture to add, returning original data');
         return updatedData;
     }
     
@@ -905,8 +965,8 @@ const generateUpdatedFloorPlan = (originalData, analysis, userMessage = '') => {
         const roomName = room.name.toLowerCase();
         console.log(`Room name: ${roomName}, bounds: r${minR}-${maxR}, c${minC}-${maxC}`);
         
-        // Only add furniture that matches the user's request
-        requestedFurniture.forEach(furnitureType => {
+        // Only add furniture that matches the user's request or suggestions
+        furnitureToAdd.forEach(furnitureType => {
             if (shouldAddFurnitureToRoom(furnitureType, roomName)) {
                 // Try multiple positions to avoid overlaps
                 let furnitureAdded = false;

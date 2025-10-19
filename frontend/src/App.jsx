@@ -5,12 +5,24 @@ import Toolbar from './components/Toolbar.jsx';
 import RenameDialog from './components/RenameDialog.jsx';
 import ContextMenu from './components/ContextMenu.jsx';
 import AIChatbot from './components/AIChatbot.jsx';
+import ErrorPopup from './components/ErrorPopup.jsx';
 import * as floorPlanService from './services/floorPlanService.js';
 import './index.css'; // Tailwind import
 
 const App = () => {
     const svgRef = useRef(null);
     const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+    const [errorPopup, setErrorPopup] = useState({ isOpen: false, message: '' });
+    
+    const showError = (message) => {
+        console.log('=== showError called ===', message);
+        setErrorPopup({ isOpen: true, message });
+    };
+
+    const closeError = () => {
+        console.log('=== closeError called ===');
+        setErrorPopup({ isOpen: false, message: '' });
+    };
     
         const { 
             state, rooms, selectedFurnitureId, cellSize, gridSize, WALL_TYPE, dragPreview,
@@ -18,7 +30,7 @@ const App = () => {
             addFurniture, clearAll, undo, redo, handleMouseDown, deleteFurniture, completeRename, 
             handleContextMenu, closeContextMenu, handleRenameFromContextMenu, handleDeleteFromContextMenu,
             closeRenameDialog, loadFloorPlan,
-        } = useFloorPlan(svgRef);
+        } = useFloorPlan(svgRef, showError);
 
         const handleSave = async () => {
             try {
@@ -64,6 +76,12 @@ const App = () => {
                 try {
                     const text = await file.text();
                     const data = JSON.parse(text);
+                    
+                    // Validate the JSON structure
+                    if (!data.walls || !data.furniture || !data.rooms || !data.metadata) {
+                        throw new Error('Invalid floor plan format. Missing required fields: walls, furniture, rooms, or metadata.');
+                    }
+                    
                     const loadedData = floorPlanService.convertFromBackendFormat(data);
                     
                     // Load the floor plan data
@@ -72,7 +90,13 @@ const App = () => {
                     console.log('Loaded data:', loadedData);
                 } catch (error) {
                     console.error('Error loading floor plan:', error);
-                    alert('Failed to load floor plan. Please check the file format.');
+                    if (error instanceof SyntaxError) {
+                        showError('Invalid JSON file. Please make sure the file contains valid JSON format.');
+                    } else if (error.message.includes('Invalid floor plan format')) {
+                        showError(error.message);
+                    } else {
+                        showError('Failed to load floor plan. Please check the file format and try again.');
+                    }
                 }
             };
             input.click();
@@ -87,10 +111,23 @@ const App = () => {
         };
 
         const handleApplyAISuggestions = (updatedFloorPlan) => {
+            console.log('=== handleApplyAISuggestions called ===');
+            console.log('updatedFloorPlan:', updatedFloorPlan);
+            
             if (updatedFloorPlan) {
-                const convertedData = floorPlanService.convertFromBackendFormat(updatedFloorPlan);
-                loadFloorPlan(convertedData.state, convertedData.rooms);
-                setIsAIChatOpen(false);
+                try {
+                    console.log('Converting from backend format...');
+                    const convertedData = floorPlanService.convertFromBackendFormat(updatedFloorPlan);
+                    console.log('Converted data:', convertedData);
+                    console.log('Furniture count:', convertedData.state.furniture.length);
+                    
+                    loadFloorPlan(convertedData.state, convertedData.rooms);
+                    setIsAIChatOpen(false);
+                    console.log('Successfully applied AI suggestions');
+                } catch (error) {
+                    console.error('Error applying AI suggestions:', error);
+                    alert('Failed to apply AI suggestions: ' + error.message);
+                }
             }
         };
 
@@ -200,6 +237,20 @@ const App = () => {
                         floorPlanData={floorPlanService.convertToBackendFormat(state, rooms, gridSize, cellSize)}
                         onApplySuggestions={handleApplyAISuggestions}
                     />
+                    
+                    {/* Error Popup */}
+                    <ErrorPopup
+                        isOpen={errorPopup.isOpen}
+                        message={errorPopup.message}
+                        onClose={closeError}
+                    />
+                    
+                    {/* Debug Error State */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div className="fixed top-0 right-0 bg-black text-white p-2 text-xs">
+                            Error State: {JSON.stringify(errorPopup)}
+                        </div>
+                    )}
                     </div>
                 </div>
             </div>
