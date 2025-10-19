@@ -1,0 +1,61 @@
+{
+  "walls": [
+    {
+      "id": 1,
+      "type": "wall",
+      "origin_x": 0,
+      "origin_y": 0,
+      "end_x": 80,
+      "end_y": 0
+    },
+    {
+      "id": 2,
+      "type": "door",
+      "origin_x": 80,
+      "origin_y": 0,
+      "end_x": 160,
+      "end_y": 0
+    }
+  ],
+  "furniture": [
+    {
+      "id": 1,
+      "name": "Sofa",
+      "origin_x": 80,
+      "origin_y": 80,
+      "end_x": 240,
+      "end_y": 160,
+      "width": 160,
+      "height": 80
+    },
+    {
+      "id": 2,
+      "name": "Coffee Table",
+      "origin_x": 80,
+      "origin_y": 200,
+      "end_x": 240,
+      "end_y": 280,
+      "width": 160,
+      "height": 80
+    }
+  ],
+  "rooms": [
+    {
+      "id": 1,
+      "name": "Living Room",
+      "cells": [
+        {"r": 1, "c": 1},
+        {"r": 1, "c": 2},
+        {"r": 2, "c": 1},
+        {"r": 2, "c": 2}
+      ],
+      "centerX": 120,
+      "centerY": 120,
+      "color": "#ffcc9980"
+    }
+  ],
+  "metadata": {
+    "gridSize": 15,
+    "cellSize": 80
+  }
+}
